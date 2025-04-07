@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styled Stock Market Chart</title>
+  <!-- Include the Lightweight Charts Library from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.4.0/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chart-container {
+      width: 80%;
+      height: 400px;
+      background-color: #fff;
+      box-shadow: 0 4px 10px black;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="chart" class="chart-container"></div>
+
+  <script>
+    // Initialize the chart with custom styles
+    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+      width: window.innerWidth * 0.8,  // Set width relative to the window width
+      height: 400,                     // Fixed height for the chart
+      layout: {
+        backgroundColor: '#f4f4f4',  // Light grey background
+        textColor: '#333',            // Text color for axes and labels
+      },
+      grid: {
+        vertLines: {
+          color: '#eeeeee',          // Light gray vertical grid lines
+        },
+        horzLines: {
+          color: '#eeeeee',          // Light gray horizontal grid lines
+        },
+      },
+      crosshair: {
+        vertLine: {
+          color: '#00ff00',           // Green color for vertical crosshair
+          width: 2,
+        },
+        horzLine: {
+          color: "red",           // Red color for horizontal crosshair
+          width: 2,
+        }
+      },
+      rightPriceScale: {
+        borderColor: '#D1D4DC',       // Right scale border color
+        borderVisible: true,
+      },
+      leftPriceScale: {
+        borderColor: '#D1D4DC',       // Left scale border color
+        borderVisible: true,
+      },
+    });
+
+    // Create a line series (could be for stock prices)
+    const lineSeries = chart.addLineSeries({
+      color: 'blue',  // Red color for the line
+      lineWidth: 3,      // Thicker line width
+      crosshairMarkerVisible: true, // Show marker on crosshair
+      crosshairMarkerRadius: 6,  // Make the crosshair marker bigger
+    });
+
+    // Generate a larger dataset (simulate stock prices for the last 2 years)
+    const data = [];
+    let currentTime = Math.floor(Date.now() / 1000) - (60 * 60 * 24 * 365); // 1 year ago
+    let basePrice = 100;
+
+    for (let i = 0; i < 730; i++) {  // 730 days for about 2 years of data
+      const priceFluctuation = (Math.random() - 0.5) * 10;  // random fluctuation between -5 and +5
+      basePrice += priceFluctuation;
+      data.push({
+        time: currentTime + (i * 60 * 60 * 24),  // Increment by 1 day (in seconds)
+        value: basePrice.toFixed(2),
+      });
+    }
+
+    // Set the generated data to the line series
+    lineSeries.setData(data);
+
+    // Resize the chart when the window is resized
+    window.addEventListener('resize', () => {
+      chart.resize(window.innerWidth * 0.8, 400);
+    });
+  </script>
+  
+
+</body>
+</html>
