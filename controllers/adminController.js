@@ -168,6 +168,21 @@ const getBlogs = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const getBlogById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findById(id).populate("author", "email");
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.json(blog);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 const deleteBlog = async (req, res) => {
   try {
@@ -202,6 +217,7 @@ const deleteComment = async (req, res) => {
 
 module.exports = {
   uploadImage,
+  getBlogById,
   getBlogs,
   getAllUsers,
   deactivateUser,

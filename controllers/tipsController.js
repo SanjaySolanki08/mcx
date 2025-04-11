@@ -11,7 +11,7 @@ const tipPopulation = [
 ];
 
 const postTip = async (req, res) => {
-  const { content, category } = req.body;
+  const { content, category, sentiment } = req.body; // Add sentiment here
   try {
     const user = await User.findById(req.user);
     if (!user || user.accountStatus !== "active") {
@@ -33,6 +33,7 @@ const postTip = async (req, res) => {
       content,
       author: req.user,
       category: categoryDoc._id,
+      sentiment: sentiment || 'neutral', // Now sentiment is properly defined
     });
 
     await tip.save();
@@ -45,7 +46,6 @@ const postTip = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 const likeTip = async (req, res) => {
   try {
     const tip = await Tip.findById(req.params.id).populate(tipPopulation);
@@ -95,10 +95,13 @@ const commentOnTip = async (req, res) => {
 };
 
 const getAllTips = async (req, res) => {
+  const { page = 1, limit = 9 } = req.query;
   try {
     const tips = await Tip.find()
       .populate(tipPopulation)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
     res.json(tips);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -107,19 +110,22 @@ const getAllTips = async (req, res) => {
 
 const getTipsByCategory = async (req, res) => {
   const { category } = req.params;
+  const { page = 1, limit = 9 } = req.query;
   try {
     let categoryId;
     if (mongoose.Types.ObjectId.isValid(category)) {
       categoryId = category;
     } else {
-      const categoryDoc = await Category.findOne({ name: new RegExp(`^${category}$`, "i") });
-      if (!categoryDoc) return res.status(404).json({ msg: "Category not found" });
+      const categoryDoc = await Category.findOne({ name: new RegExp(`^${category}$`, 'i') });
+      if (!categoryDoc) return res.status(404).json({ msg: 'Category not found' });
       categoryId = categoryDoc._id;
     }
 
     const tips = await Tip.find({ category: categoryId })
       .populate(tipPopulation)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
     res.json(tips);
   } catch (error) {
     res.status(500).json({ error: error.message });

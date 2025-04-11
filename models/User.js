@@ -64,12 +64,7 @@ const userSchema = new mongoose.Schema({
   },
   lastActive: { 
     type: Date, 
-    default: () => {
-      const date = new Date();
-      const offset = 5.5 * 60; // 5 hours 30 minutes in minutes
-      const newDate = new Date(date.getTime() + offset * 60 * 1000); // Adjust date in milliseconds
-      return newDate;
-    }
+    default: Date.now // Store in UTC
   },
 }, { timestamps: true });
 
