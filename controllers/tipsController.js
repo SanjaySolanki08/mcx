@@ -94,6 +94,7 @@ const commentOnTip = async (req, res) => {
   }
 };
 
+// Add proper error handling and response format
 const getAllTips = async (req, res) => {
   const { page = 1, limit = 9 } = req.query;
   try {
@@ -101,10 +102,28 @@ const getAllTips = async (req, res) => {
       .populate(tipPopulation)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-    res.json(tips);
+      .limit(parseInt(limit))
+      .lean(); // Add lean() for better performance
+
+    const total = await Tip.countDocuments();
+
+    res.json({
+      success: true,
+      tips,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching tips:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch tips',
+      error: error.message
+    });
   }
 };
 
